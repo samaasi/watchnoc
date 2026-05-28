@@ -1,24 +1,25 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
+  backend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile
+    container_name: watchnoc_backend
     environment:
-      POSTGRES_USER: deployguard
-      POSTGRES_PASSWORD: deployguard
-      POSTGRES_DB: deployguard
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
     ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "8080:8080"
+    restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
+  frontend:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.frontend
+    container_name: watchnoc_frontend
     ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  redis_data:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped

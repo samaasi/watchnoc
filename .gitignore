@@ -5,6 +5,7 @@
 *.so
 *.dylib
 server
+bin/
 
 # Test binary, built with `go test -c`
 *.test
@@ -14,9 +15,11 @@ server
 
 # Dependency directories
 vendor/
+frontend/node_modules/
 
 # Go workspace file
 go.work
+go.work.sum
 
 # IDE
 .vscode/
