@@ -2,19 +2,21 @@ package store
 
 import (
 	"context"
-	"github.com/samaasi/watchnoc/internal/config"
 	"fmt"
 	"log"
+
+	"github.com/samaasi/watchnoc/internal/config"
 
 	"github.com/redis/go-redis/v9"
 )
 
 func NewRedis(cfg config.RedisConfig) (*redis.Client, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
-		Password: cfg.Password,
-		DB:       cfg.DB,
-	})
+	opts, err := redis.ParseURL(cfg.URL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse redis url: %w", err)
+	}
+
+	rdb := redis.NewClient(opts)
 
 	ctx := context.Background()
 	if err := rdb.Ping(ctx).Err(); err != nil {
