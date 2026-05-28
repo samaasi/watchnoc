@@ -1,19 +1,18 @@
 CREATE TABLE orgs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    plan VARCHAR(50) NOT NULL DEFAULT 'free',
-    retention_days INT NOT NULL DEFAULT 90,
-    settings JSONB NOT NULL DEFAULT '{}',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    id              BIGINT          PRIMARY KEY,
+    name            VARCHAR(255)    NOT NULL,
+    slug            VARCHAR(48)     NOT NULL,
+    plan            VARCHAR(32)     NOT NULL DEFAULT 'starter',
+    retention_days  INT             NOT NULL DEFAULT 90,
+    trial_ends_at   TIMESTAMPTZ,
+    billing_email   VARCHAR(255),
+    settings        JSONB           NOT NULL DEFAULT '{}',
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+    deleted_at      TIMESTAMPTZ,
+    CONSTRAINT orgs_slug_key UNIQUE (slug)
 );
 
-CREATE TABLE org_members (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'engineer',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    UNIQUE(org_id, user_id)
-);
+CREATE INDEX idx_orgs_slug        ON orgs (slug) WHERE deleted_at IS NULL;
+CREATE INDEX idx_orgs_plan        ON orgs (plan) WHERE deleted_at IS NULL;
+CREATE INDEX idx_orgs_deleted_at  ON orgs (deleted_at);
