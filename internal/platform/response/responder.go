@@ -1,7 +1,7 @@
 package response
 
 import (
-	"deployguard/internal/platform/errors"
+	"github.com/samaasi/watchnoc/internal/platform/errors"
 	"encoding/json"
 	"net/http"
 	"time"

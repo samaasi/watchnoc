@@ -1,6 +1,9 @@
 package response
 
-import "time"
+import (
+	"time"
+	"github.com/samaasi/watchnoc/internal/platform/errors"
+)
 
 type ResponseMeta struct {
 	RequestID string    `json:"request_id"`
@@ -17,15 +20,9 @@ type Envelope[T any] struct {
 }
 
 type ErrorDetail struct {
-	Code           string            `json:"code"`
-	Message        string            `json:"message"`
-	UserMessage    string            `json:"user_message"`
-	HTTPStatus     int               `json:"http_status"`
-	ValidationErrors []ValidationError `json:"validation_errors,omitempty"`
-}
-
-type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-	Rule    string `json:"rule,omitempty"`
+	Code           string                     `json:"code"`
+	Message        string                     `json:"message"`
+	UserMessage    string                     `json:"user_message"`
+	HTTPStatus     int                        `json:"http_status"`
+	ValidationErrors []errors.ValidationError `json:"validation_errors,omitempty"`
 }

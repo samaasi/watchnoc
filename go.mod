@@ -1,4 +1,4 @@
-module deployguard
+module github.com/samaasi/watchnoc
 
 go 1.25.0
 

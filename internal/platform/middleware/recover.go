@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"deployguard/internal/platform/errors"
-	"deployguard/internal/platform/response"
+	"github.com/samaasi/watchnoc/internal/platform/errors"
+	"github.com/samaasi/watchnoc/internal/platform/response"
 	"log"
 	"net/http"
 	"runtime/debug"

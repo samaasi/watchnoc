@@ -1,7 +1,7 @@
 package store
 
 import (
-	"deployguard/internal/config"
+	"github.com/samaasi/watchnoc/internal/config"
 	"fmt"
 	"log"
 
