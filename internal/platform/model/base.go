@@ -6,6 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
+var idGenerator interface{ NextID() uint64 }
+
+func SetIDGenerator(generator interface{ NextID() uint64 }) {
+	idGenerator = generator
+}
+
 // Base is embedded by every non-audit model.
 // It provides a Snowflake primary key and standard timestamps.
 // Do NOT embed this in AuditRecord — audit records have no UpdatedAt and no DeletedAt.
@@ -21,4 +27,20 @@ type Base struct {
 type AppendOnlyBase struct {
 	ID        uint64    `gorm:"primaryKey;autoIncrement:false" json:"id"`
 	CreatedAt time.Time `gorm:"not null;index"                json:"created_at"`
+}
+
+// BeforeCreate generates a snowflake ID if not already set
+func (b *Base) BeforeCreate(tx *gorm.DB) error {
+	if b.ID == 0 && idGenerator != nil {
+		b.ID = idGenerator.NextID()
+	}
+	return nil
+}
+
+// BeforeCreate generates a snowflake ID for append-only base
+func (b *AppendOnlyBase) BeforeCreate(tx *gorm.DB) error {
+	if b.ID == 0 && idGenerator != nil {
+		b.ID = idGenerator.NextID()
+	}
+	return nil
 }
