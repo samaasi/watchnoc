@@ -5,17 +5,10 @@ server:
   idle_timeout: 60
 
 database:
-  host: localhost
-  port: 5432
-  user: deployguard
-  password: deployguard
-  name: deployguard
-  sslmode: disable
+  url: postgres://watchnoc:watchnoc@localhost:5432/watchnoc?sslmode=disable
 
 redis:
-  host: localhost
-  port: 6379
-  db: 0
+  url: redis://localhost:6379/0
 
 auth:
   clerk_secret_key: ""

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
@@ -22,19 +21,11 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string
-	Port     int
-	User     string
-	Password string
-	Name     string
-	SSLMode  string
+	URL string
 }
 
 type RedisConfig struct {
-	Host     string
-	Port     int
-	Password string
-	DB       int
+	URL string
 }
 
 type AuthConfig struct {
@@ -54,16 +45,12 @@ func Load() *Config {
 	viper.SetDefault("server.write_timeout", 30)
 	viper.SetDefault("server.idle_timeout", 60)
 
-	viper.SetDefault("database.host", "localhost")
-	viper.SetDefault("database.port", 5432)
-	viper.SetDefault("database.user", "deployguard")
-	viper.SetDefault("database.password", "deployguard")
-	viper.SetDefault("database.name", "deployguard")
-	viper.SetDefault("database.sslmode", "disable")
+	viper.SetDefault("database.url", "postgres://deployguard:deployguard@localhost:5432/deployguard?sslmode=disable")
+	viper.SetDefault("redis.url", "redis://localhost:6379/0")
 
-	viper.SetDefault("redis.host", "localhost")
-	viper.SetDefault("redis.port", 6379)
-	viper.SetDefault("redis.db", 0)
+	// Bind environment variables
+	viper.BindEnv("database.url", "DATABASE_URL")
+	viper.BindEnv("redis.url", "REDIS_URL")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Warning: config file not found, using defaults: %v", err)
@@ -77,18 +64,10 @@ func Load() *Config {
 			IdleTimeout:  viper.GetInt("server.idle_timeout"),
 		},
 		Database: DatabaseConfig{
-			Host:     viper.GetString("database.host"),
-			Port:     viper.GetInt("database.port"),
-			User:     viper.GetString("database.user"),
-			Password: viper.GetString("database.password"),
-			Name:     viper.GetString("database.name"),
-			SSLMode:  viper.GetString("database.sslmode"),
+			URL: viper.GetString("database.url"),
 		},
 		Redis: RedisConfig{
-			Host:     viper.GetString("redis.host"),
-			Port:     viper.GetInt("redis.port"),
-			Password: viper.GetString("redis.password"),
-			DB:       viper.GetInt("redis.db"),
+			URL: viper.GetString("redis.url"),
 		},
 		Auth: AuthConfig{
 			ClerkSecretKey: viper.GetString("auth.clerk_secret_key"),
@@ -100,8 +79,5 @@ func Load() *Config {
 }
 
 func (c *DatabaseConfig) DSN() string {
-	return fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		c.Host, c.Port, c.User, c.Password, c.Name, c.SSLMode,
-	)
+	return c.URL
 }
