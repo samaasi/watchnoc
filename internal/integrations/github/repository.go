@@ -4,11 +4,11 @@ import "context"
 
 // InstallationRepository defines the interface for GitHub installation persistence.
 type InstallationRepository interface {
-	Create(ctx context.Context, install *GitHubInstallation) error
-	Update(ctx context.Context, install *GitHubInstallation) error
-	FindByOrgID(ctx context.Context, orgID uint64) (*GitHubInstallation, error)
-	FindByRepoFullName(ctx context.Context, repoFullName string) (*GitHubInstallation, error)
-	ListActive(ctx context.Context) ([]*GitHubInstallation, error)
+	Create(ctx context.Context, install *Installation) error
+	Update(ctx context.Context, install *Installation) error
+	FindByOrgID(ctx context.Context, orgID uint64) (*Installation, error)
+	FindByRepoFullName(ctx context.Context, repoFullName string) (*Installation, error)
+	ListActive(ctx context.Context) ([]*Installation, error)
 	MarkRevoked(ctx context.Context, installationID int64) error
 }
 

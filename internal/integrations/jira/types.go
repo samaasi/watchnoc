@@ -3,17 +3,30 @@ package jira
 import (
 	"context"
 	"time"
+
+	"github.com/samaasi/watchnoc/internal/platform/model"
 )
 
 // Installation represents a Jira integration installation for an organization.
 type Installation struct {
-	OrgID     uint64
-	CloudID   string
-	CloudName string
-	CloudURL  string
-	Scope     string
-	Revoked   bool
+	model.Base `tombstone:"hard_purge"`
+
+	OrgID          uint64 `gorm:"not null;uniqueIndex" tenant:"org_id"`
+	CloudID        string `gorm:"size:255" audit:"true"`
+	CloudName      string `gorm:"size:255" audit:"true"`
+	CloudURL       string `gorm:"size:1024" audit:"true"`
+	Scope          string `gorm:"size:512"`
+	// AccessTokenEncrypted is the AES-256-GCM ciphertext of the OAuth access token.
+	AccessTokenEncrypted  string `gorm:"type:text" pii:"true" crypto:"true" mask:"partial" json:"-"`
+	// RefreshTokenEncrypted is the ciphertext of the OAuth refresh token.
+	RefreshTokenEncrypted string `gorm:"type:text" pii:"true" crypto:"true" mask:"partial" json:"-"`
+	// TokenExpiresAt — Jira tokens expire and must be refreshed.
+	TokenExpiresAt        *time.Time `gorm:"index" json:"token_expires_at,omitempty"`
+	// RevokedAt is set when the OAuth app is uninstalled.
+	RevokedAt *time.Time `json:"revoked_at,omitempty"`
 }
+
+func (Installation) TableName() string { return "jira_installations" }
 
 // InstallationRepository is the interface for persisting and retrieving Jira installations.
 type InstallationRepository interface {

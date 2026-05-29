@@ -185,18 +185,7 @@ type DeployEvent struct {
 
 func (DeployEvent) TableName() string { return "deploy_events" }
 
-// LinkedTicket represents a task or issue (Jira, Linear, Trello) associated with a deployment.
-type LinkedTicket struct {
-	model.Base
 
-	DeployEventID uint64 `gorm:"not null;index"`
-	Provider      string `gorm:"not null;size:32"`  // "jira", "linear", "trello"
-	TicketID      string `gorm:"not null;size:255"` // "ENG-123"
-	TicketURL     string `gorm:"size:1024"`
-	Status        string `gorm:"size:64"`
-}
-
-func (LinkedTicket) TableName() string { return "linked_tickets" }
 
 // ToRiskLevel derives the human-readable tier from the numeric score.
 func ToRiskLevel(score int) RiskLevel {

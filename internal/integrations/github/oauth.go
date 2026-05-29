@@ -89,19 +89,19 @@ func NewInstallationRepository(db interface{}) InstallationRepository {
 
 type stubInstallationRepository struct{}
 
-func (s *stubInstallationRepository) Create(ctx context.Context, install *GitHubInstallation) error {
+func (s *stubInstallationRepository) Create(ctx context.Context, install *Installation) error {
 	return nil
 }
-func (s *stubInstallationRepository) Update(ctx context.Context, install *GitHubInstallation) error {
+func (s *stubInstallationRepository) Update(ctx context.Context, install *Installation) error {
 	return nil
 }
-func (s *stubInstallationRepository) FindByOrgID(ctx context.Context, orgID uint64) (*GitHubInstallation, error) {
+func (s *stubInstallationRepository) FindByOrgID(ctx context.Context, orgID uint64) (*Installation, error) {
 	return nil, nil
 }
-func (s *stubInstallationRepository) FindByRepoFullName(ctx context.Context, repoFullName string) (*GitHubInstallation, error) {
+func (s *stubInstallationRepository) FindByRepoFullName(ctx context.Context, repoFullName string) (*Installation, error) {
 	return nil, nil
 }
-func (s *stubInstallationRepository) ListActive(ctx context.Context) ([]*GitHubInstallation, error) {
+func (s *stubInstallationRepository) ListActive(ctx context.Context) ([]*Installation, error) {
 	return nil, nil
 }
 func (s *stubInstallationRepository) MarkRevoked(ctx context.Context, installationID int64) error {
