@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/samaasi/watchnoc/internal/config"
 
@@ -16,9 +17,17 @@ func NewRedis(cfg config.RedisConfig) (*redis.Client, error) {
 		return nil, fmt.Errorf("failed to parse redis url: %w", err)
 	}
 
+	// Configure connection pool
+	opts.PoolSize = 100
+	opts.MinIdleConns = 10
+	opts.ConnMaxLifetime = time.Hour
+	opts.ConnMaxIdleTime = 10 * time.Minute
+
 	rdb := redis.NewClient(opts)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("failed to ping redis: %w", err)
 	}

@@ -4,17 +4,18 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
 // Handler handles health check endpoints.
 type Handler struct {
-	DB *gorm.DB
-	// Redis client would go here too
+	DB  *gorm.DB
+	RDB *redis.Client
 }
 
-func NewHandler(db *gorm.DB) *Handler {
-	return &Handler{DB: db}
+func NewHandler(db *gorm.DB, rdb *redis.Client) *Handler {
+	return &Handler{DB: db, RDB: rdb}
 }
 
 func (h *Handler) Register(r chi.Router) {
@@ -48,7 +49,14 @@ func (h *Handler) Ready(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Add Redis ping when Redis is set up
+	// Check Redis health
+	if h.RDB != nil {
+		if err := h.RDB.Ping(r.Context()).Err(); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("Redis ping failed"))
+			return
+		}
+	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))

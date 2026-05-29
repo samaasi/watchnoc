@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 
 	githubintegration "github.com/samaasi/watchnoc/internal/integrations/github"
@@ -12,7 +13,8 @@ import (
 )
 
 type App struct {
-	DB *gorm.DB
+	DB  *gorm.DB
+	RDB *redis.Client
 
 	// Integrations
 	GitHubWebhook    *githubintegration.WebhookHandler
@@ -32,26 +34,42 @@ type App struct {
 	JiraInstallRepo jiraintegration.InstallationRepository
 }
 
-func NewApp(db *gorm.DB) (*App, error) {
+func NewApp(db *gorm.DB, rdb *redis.Client) (*App, error) {
 	return &App{
-		DB: db,
+		DB:  db,
+		RDB: rdb,
 	}, nil
 }
 
 func (a *App) Close() error {
-	if a.DB == nil {
-		return nil
+	var errs []error
+
+	if a.DB != nil {
+		sqlDB, err := a.DB.DB()
+		if err != nil {
+			errs = append(errs, fmt.Errorf("failed to get DB instance: %w", err))
+		} else {
+			if err := sqlDB.Close(); err != nil {
+				errs = append(errs, fmt.Errorf("failed to close DB: %w", err))
+			}
+		}
 	}
-	sqlDB, err := a.DB.DB()
-	if err != nil {
-		return fmt.Errorf("failed to get DB instance: %w", err)
+
+	if a.RDB != nil {
+		if err := a.RDB.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close Redis: %w", err))
+		}
 	}
-	return sqlDB.Close()
+
+	if len(errs) > 0 {
+		return fmt.Errorf("close errors: %v", errs)
+	}
+	return nil
 }
 
 // NewAppFromConfig is the entrypoint used by cmd/server/main.go to initialize the App.
 func NewAppFromConfig(ctx context.Context, cfg interface{}) (*App, func(), error) {
-	app, err := NewApp(nil)
+	app, err := NewApp(nil, nil)
 	if err != nil {
 		return nil, nil, err
 	}
