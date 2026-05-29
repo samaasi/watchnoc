@@ -87,11 +87,6 @@ type ServiceMetadata struct {
 
 func (ServiceMetadata) TableName() string { return "service_metadata" }
 
-// Service defines the interface for org domain operations.
-type Service interface {
-	// Add org.Service methods as needed
-}
-
 // contextKey is the type for context keys to avoid collisions.
 type contextKey string
 
