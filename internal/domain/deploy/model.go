@@ -206,6 +206,8 @@ type Service interface {
 	UpdateDeploymentStatus(ctx context.Context, req StatusUpdateRequest) error
 	UpdateCIStatus(ctx context.Context, req CIStatusUpdateRequest) error
 	GetDeployForApproval(ctx context.Context, orgID, deployID uint64) (*DeployForApproval, error)
+	ListByOrg(ctx context.Context, orgID uint64, limit, offset int) ([]*DeployEvent, error)
+	GetByID(ctx context.Context, orgID, deployID uint64) (*DeployEvent, error)
 }
 
 // IngestRequest defines the request for ingesting a new deploy event.
@@ -234,6 +236,7 @@ type IngestRequest struct {
 
 // StatusUpdateRequest defines the request for updating deploy status.
 type StatusUpdateRequest struct {
+	OrgID              uint64
 	GitHubDeploymentID int64
 	RepoFullName       string
 	State              string

@@ -99,7 +99,10 @@ func (s *service) IngestFromWebhook(ctx context.Context, req IngestRequest) (uin
 
 	// Handle revert
 	if req.IsRevert {
-		// TODO: Find previous deploy and set RevertsDeployEventID
+		lastDeploy, err := s.repo.FindLastDeployByEnv(ctx, req.OrgID, req.RepoOwner, req.RepoName, req.Environment)
+		if err == nil && lastDeploy != nil {
+			deploy.RevertsDeployEventID = &lastDeploy.ID
+		}
 	}
 
 	// Calculate risk score (placeholder for now)
@@ -118,21 +121,53 @@ func (s *service) ExistsByGitHubDeploymentID(ctx context.Context, orgID uint64, 
 }
 
 func (s *service) UpdateDeploymentStatus(ctx context.Context, req StatusUpdateRequest) error {
-	// Split repo full name
+	deploy, err := s.repo.FindByGitHubDeploymentID(ctx, req.OrgID, req.GitHubDeploymentID)
+	if err != nil {
+		return err
+	}
+
+	switch req.State {
+	case "success":
+		deploy.DeploymentOutcome = OutcomeSuccess
+	case "failure", "error":
+		deploy.DeploymentOutcome = OutcomeFailure
+	case "inactive":
+		// Often signifies the environment was superseded
+	}
+
+	if req.CompletedAt != nil {
+		deploy.CompletedAt = req.CompletedAt
+	}
+
+	return s.repo.Update(ctx, deploy)
+}
+
+func (s *service) UpdateCIStatus(ctx context.Context, req CIStatusUpdateRequest) error {
+	// Splitting repo full name
 	parts := strings.SplitN(req.RepoFullName, "/", 2)
 	if len(parts) != 2 {
 		return ErrDeployInvalidStatus
 	}
 
-	// Find deploy by GitHub deployment ID
-	// Note: We need orgID here - in real implementation, we'd get it from repo mapping
-	// For now, we'll skip orgID check (placeholder)
-	// Placeholder: We need a way to find orgID from repo full name
-	// For now, let's just return not found
-	return ErrDeployNotFound
+	deploys, err := s.repo.FindByCommitSHA(ctx, req.OrgID, req.RepoFullName, req.CommitSHA)
+	if err != nil {
+		return err
+	}
+
+	for _, deploy := range deploys {
+		deploy.CIStatus = req.CIStatus
+		if err := s.repo.Update(ctx, deploy); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func (s *service) UpdateCIStatus(ctx context.Context, req CIStatusUpdateRequest) error {
-	// TODO: Implement CI status update
-	return nil
+func (s *service) ListByOrg(ctx context.Context, orgID uint64, limit, offset int) ([]*DeployEvent, error) {
+	return s.repo.ListByOrg(ctx, orgID, limit, offset)
+}
+
+func (s *service) GetByID(ctx context.Context, orgID, deployID uint64) (*DeployEvent, error) {
+	return s.repo.FindByID(ctx, orgID, deployID)
 }

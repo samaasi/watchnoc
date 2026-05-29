@@ -195,6 +195,11 @@ func (w *DeployIngestionWorker) processDeploymentStatusEvent(ctx context.Context
 		return fmt.Errorf("parse deployment_status event: %w", err)
 	}
 
+	installation, err := w.installRepo.FindByRepoFullName(ctx, statusEvent.RepoFullName)
+	if err != nil {
+		return fmt.Errorf("resolve installation for %s: %w", statusEvent.RepoFullName, err)
+	}
+
 	// Determine CompletedAt — only set if state is terminal
 	var completedAt *time.Time
 	if statusEvent.State == "success" || statusEvent.State == "failure" || statusEvent.State == "error" {
@@ -203,6 +208,7 @@ func (w *DeployIngestionWorker) processDeploymentStatusEvent(ctx context.Context
 
 	// Update the existing DeployEvent with the outcome
 	return w.deployService.UpdateDeploymentStatus(ctx, deploy.StatusUpdateRequest{
+		OrgID:              installation.OrgID,
 		GitHubDeploymentID: statusEvent.GitHubDeploymentID,
 		RepoFullName:       statusEvent.RepoFullName,
 		State:              statusEvent.State,

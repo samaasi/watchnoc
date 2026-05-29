@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/samaasi/watchnoc/internal/platform/errors"
+	"github.com/samaasi/watchnoc/internal/platform/middleware"
 	"github.com/samaasi/watchnoc/internal/platform/response"
 )
 
@@ -24,18 +26,44 @@ func (h *Handler) Register(r chi.Router) {
 }
 
 func (h *Handler) handleListDeploys(w http.ResponseWriter, r *http.Request) {
-	// TODO: Get orgID from context
-	// TODO: Parse limit and offset
-	h.responder.Success(w, r, map[string]interface{}{"deploys": []interface{}{}})
+	orgID, ok := middleware.GetOrgID(r.Context())
+	if !ok {
+		h.responder.Error(w, r, errors.ErrUnauthorized)
+		return
+	}
+
+	deploys, err := h.service.ListByOrg(r.Context(), orgID, 50, 0)
+	if err != nil {
+		h.responder.Error(w, r, errors.ErrInternalServer)
+		return
+	}
+
+	h.responder.Success(w, r, map[string]interface{}{"data": deploys})
 }
 
 func (h *Handler) handleGetDeploy(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	_, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		h.responder.Error(w, r, ErrDeployInvalidStatus)
+	orgID, ok := middleware.GetOrgID(r.Context())
+	if !ok {
+		h.responder.Error(w, r, errors.ErrUnauthorized)
 		return
 	}
-	// TODO: Get orgID from context and find deploy
-	h.responder.Success(w, r, map[string]interface{}{"deploy": nil})
+
+	idStr := chi.URLParam(r, "id")
+	deployID, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.responder.Error(w, r, errors.Validation("INVALID_ID", "invalid deploy ID"))
+		return
+	}
+
+	deploy, err := h.service.GetByID(r.Context(), orgID, deployID)
+	if err != nil {
+		if appErr, ok := err.(errors.AppError); ok && appErr.Code == ErrDeployNotFound.Code {
+			h.responder.Error(w, r, errors.ErrNotFound)
+			return
+		}
+		h.responder.Error(w, r, errors.ErrInternalServer)
+		return
+	}
+
+	h.responder.Success(w, r, deploy)
 }

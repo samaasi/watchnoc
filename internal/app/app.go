@@ -50,8 +50,9 @@ func (a *deployReaderAdapter) GetDeployForApproval(ctx context.Context, orgID, d
 }
 
 type App struct {
-	DB  *gorm.DB
-	RDB *redis.Client
+	DB        *gorm.DB
+	RDB       *redis.Client
+	Responder *response.ChiResponder
 
 	// Integrations
 	GitHubWebhook    *githubintegration.WebhookHandler
@@ -82,6 +83,7 @@ type App struct {
 func NewApp(
 	db *gorm.DB,
 	rdb *redis.Client,
+	responder *response.ChiResponder,
 	authHandler *auth.Handler,
 	approvalHandler *approval.Handler,
 	auditHandler *audit.Handler,
@@ -92,6 +94,7 @@ func NewApp(
 	return &App{
 		DB:              db,
 		RDB:             rdb,
+		Responder:       responder,
 		AuthHandler:     authHandler,
 		ApprovalHandler: approvalHandler,
 		AuditHandler:    auditHandler,
@@ -149,7 +152,7 @@ func (a *App) RegisterRoutes(r chi.Router) {
 }
 
 // NewAppFromConfig is the entrypoint used by cmd/server/main.go to initialize the App.
-func NewAppFromConfig(ctx context.Context, cfg *config.Config) (*App, func(), error) {
+func NewAppFromConfig(ctx context.Context, cfg *config.Config, responder *response.ChiResponder) (*App, func(), error) {
 	// Run database migrations first
 	if err := store.RunMigrations(cfg.Database, ""); err != nil {
 		return nil, nil, fmt.Errorf("failed to run migrations: %w", err)
@@ -166,9 +169,6 @@ func NewAppFromConfig(ctx context.Context, cfg *config.Config) (*App, func(), er
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to init redis: %w", err)
 	}
-
-	// Initialize responder
-	responder := response.NewChiResponder()
 
 	// Initialize auth domain
 	authRepo := auth.NewRepository(db)
@@ -202,6 +202,7 @@ func NewAppFromConfig(ctx context.Context, cfg *config.Config) (*App, func(), er
 	app, err := NewApp(
 		db,
 		rdb,
+		responder,
 		authHandler,
 		approvalHandler,
 		auditHandler,
