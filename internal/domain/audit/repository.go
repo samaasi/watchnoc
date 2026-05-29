@@ -11,7 +11,8 @@ type auditRepository struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) *auditRepository {
+// NewRepository creates a new audit repository
+func NewRepository(db *gorm.DB) Repository {
 	return &auditRepository{db: db}
 }
 
@@ -29,6 +30,32 @@ type AuditExportRow struct {
 	DeployRiskLevel   string     `db:"deploy_risk_level"`
 	TicketKey         string     `db:"ticket_key"`
 	RecordHash        string     `db:"record_hash"`
+}
+
+func (r *auditRepository) Create(ctx context.Context, record *AuditRecord) error {
+	return r.db.WithContext(ctx).Create(record).Error
+}
+
+func (r *auditRepository) FindByID(ctx context.Context, orgID, id uint64) (*AuditRecord, error) {
+	var record AuditRecord
+	err := r.db.WithContext(ctx).Where("org_id = ? AND id = ?", orgID, id).First(&record).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrAuditRecordNotFound
+		}
+		return nil, err
+	}
+	return &record, nil
+}
+
+func (r *auditRepository) ListByOrg(ctx context.Context, orgID uint64, limit, offset int) ([]*AuditRecord, error) {
+	var records []*AuditRecord
+	err := r.db.WithContext(ctx).Where("org_id = ?", orgID).
+		Order("occurred_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&records).Error
+	return records, err
 }
 
 // ListForExport fetches the full audit trail for a compliance export.
