@@ -1,83 +1,83 @@
 package config
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	Redis    RedisConfig
-	Auth     AuthConfig
+	LogLevel string         `mapstructure:"log_level"`
+	Server   ServerConfig   `mapstructure:"server"`
+	Database DatabaseConfig `mapstructure:"database"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	Auth     AuthConfig     `mapstructure:"auth"`
+	GitHub   GitHubConfig   `mapstructure:"github"`
+	Trello   TrelloConfig   `mapstructure:"trello"`
 }
 
 type ServerConfig struct {
-	Port         int
-	ReadTimeout  int
-	WriteTimeout int
-	IdleTimeout  int
+	Port         int `mapstructure:"port"`
+	ReadTimeout  int `mapstructure:"read_timeout"`
+	WriteTimeout int `mapstructure:"write_timeout"`
+	IdleTimeout  int `mapstructure:"idle_timeout"`
 }
 
 type DatabaseConfig struct {
-	URL string
+	URL string `mapstructure:"url"`
 }
 
 type RedisConfig struct {
-	URL string
+	URL string `mapstructure:"url"`
 }
 
 type AuthConfig struct {
-	ClerkSecretKey string
-	ClerkPublicKey string
+	ClerkSecretKey string `mapstructure:"clerk_secret_key"`
+	ClerkPublicKey string `mapstructure:"clerk_public_key"`
 }
 
-func Load() *Config {
+type GitHubConfig struct {
+	AppID          int64  `mapstructure:"GITHUB_APP_ID"`
+	AppPrivateKey  string `mapstructure:"GITHUB_APP_PRIVATE_KEY"`
+	WebhookSecret  string `mapstructure:"GITHUB_WEBHOOK_SECRET"`
+	ClientID       string `mapstructure:"GITHUB_CLIENT_ID"`
+	ClientSecret   string `mapstructure:"GITHUB_CLIENT_SECRET"`
+	BaseURL        string `mapstructure:"GITHUB_API_BASE_URL"`
+	WebhookBaseURL string `mapstructure:"GITHUB_WEBHOOK_BASE_URL"`
+}
+
+// DecodedPrivateKey decodes the base64/PEM private key from the config.
+func (g *GitHubConfig) DecodedPrivateKey() ([]byte, error) {
+	if g.AppPrivateKey == "" {
+		return nil, fmt.Errorf("github private key is not configured")
+	}
+	return []byte(g.AppPrivateKey), nil
+}
+
+type TrelloConfig struct {
+	APIKey             string `mapstructure:"TRELLO_API_KEY"`
+	APISecret          string `mapstructure:"TRELLO_API_SECRET"`
+	CallbackURL        string `mapstructure:"TRELLO_OAUTH_CALLBACK_URL"`
+	WebhookCallbackURL string `mapstructure:"TRELLO_WEBHOOK_CALLBACK_URL"`
+	BaseURL            string `mapstructure:"TRELLO_API_BASE_URL"`
+}
+
+func Load() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./internal/config")
+	viper.AddConfigPath("./watchnoc/internal/config")
 	viper.AutomaticEnv()
 
-	viper.SetDefault("server.port", 8080)
-	viper.SetDefault("server.read_timeout", 30)
-	viper.SetDefault("server.write_timeout", 30)
-	viper.SetDefault("server.idle_timeout", 60)
-
-	viper.SetDefault("database.url", "postgres://deployguard:deployguard@localhost:5432/deployguard?sslmode=disable")
-	viper.SetDefault("redis.url", "redis://localhost:6379/0")
-
-	// Bind environment variables
-	viper.BindEnv("database.url", "DATABASE_URL")
-	viper.BindEnv("redis.url", "REDIS_URL")
-
 	if err := viper.ReadInConfig(); err != nil {
-		log.Printf("Warning: config file not found, using defaults: %v", err)
+		log.Printf("Warning: failed to read config file: %v", err)
 	}
 
-	cfg := &Config{
-		Server: ServerConfig{
-			Port:         viper.GetInt("server.port"),
-			ReadTimeout:  viper.GetInt("server.read_timeout"),
-			WriteTimeout: viper.GetInt("server.write_timeout"),
-			IdleTimeout:  viper.GetInt("server.idle_timeout"),
-		},
-		Database: DatabaseConfig{
-			URL: viper.GetString("database.url"),
-		},
-		Redis: RedisConfig{
-			URL: viper.GetString("redis.url"),
-		},
-		Auth: AuthConfig{
-			ClerkSecretKey: viper.GetString("auth.clerk_secret_key"),
-			ClerkPublicKey: viper.GetString("auth.clerk_public_key"),
-		},
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
-
-	return cfg
-}
-
-func (c *DatabaseConfig) DSN() string {
-	return c.URL
+	return &cfg, nil
 }

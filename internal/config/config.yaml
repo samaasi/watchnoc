@@ -13,3 +13,19 @@ redis:
 auth:
   clerk_secret_key: ""
   clerk_public_key: ""
+
+github:
+  GITHUB_APP_ID: 0
+  GITHUB_APP_PRIVATE_KEY: ""
+  GITHUB_WEBHOOK_SECRET: ""
+  GITHUB_CLIENT_ID: ""
+  GITHUB_CLIENT_SECRET: ""
+  GITHUB_API_BASE_URL: "https://api.github.com"
+  GITHUB_WEBHOOK_BASE_URL: ""
+
+trello:
+  TRELLO_API_KEY: ""
+  TRELLO_API_SECRET: ""
+  TRELLO_OAUTH_CALLBACK_URL: ""
+  TRELLO_WEBHOOK_CALLBACK_URL: ""
+  TRELLO_API_BASE_URL: "https://api.trello.com/1"
