@@ -1,0 +1,41 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 9876543210,
+    "name": "Deploy Production",
+    "head_branch": "main",
+    "head_sha": "a3f9d2c1b4e5f6789012345678901234567890ab",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/acme-corp/payment-service/actions/runs/9876543210",
+    "created_at": "2026-05-27T14:30:00Z",
+    "updated_at": "2026-05-27T14:35:00Z",
+    "actor": {
+      "login": "alice-chen"
+    },
+    "head_commit": {
+      "id": "a3f9d2c1b4e5f6789012345678901234567890ab",
+      "message": "feat(payments): add retry logic for failed transactions",
+      "timestamp": "2026-05-27T14:32:00Z",
+      "author": {
+        "name": "Alice Chen",
+        "email": "alice@acme.com"
+      }
+    }
+  },
+  "repository": {
+    "name": "payment-service",
+    "full_name": "acme-corp/payment-service",
+    "default_branch": "main",
+    "owner": {
+      "login": "acme-corp"
+    }
+  },
+  "sender": {
+    "login": "alice-chen"
+  },
+  "installation": {
+    "id": 12345678
+  }
+}
