@@ -8,14 +8,18 @@ import (
 )
 
 type Config struct {
-	LogLevel string         `mapstructure:"log_level"`
-	Server   ServerConfig   `mapstructure:"server"`
-	Database DatabaseConfig `mapstructure:"database"`
-	Redis    RedisConfig    `mapstructure:"redis"`
-	Auth     AuthConfig     `mapstructure:"auth"`
-	GitHub   GitHubConfig   `mapstructure:"github"`
-	Trello   TrelloConfig   `mapstructure:"trello"`
-	Jira     JiraConfig     `mapstructure:"jira"`
+	LogLevel  string          `mapstructure:"log_level"`
+	Server    ServerConfig    `mapstructure:"server"`
+	Database  DatabaseConfig  `mapstructure:"database"`
+	Redis     RedisConfig     `mapstructure:"redis"`
+	Auth      AuthConfig      `mapstructure:"auth"`
+	GitHub    GitHubConfig    `mapstructure:"github"`
+	Trello    TrelloConfig    `mapstructure:"trello"`
+	Jira      JiraConfig      `mapstructure:"jira"`
+	GitLab    GitLabConfig    `mapstructure:"gitlab"`
+	Linear    LinearConfig    `mapstructure:"linear"`
+	Slack     SlackConfig     `mapstructure:"slack"`
+	PagerDuty PagerDutyConfig `mapstructure:"pagerduty"`
 }
 
 type ServerConfig struct {
@@ -72,6 +76,38 @@ type JiraConfig struct {
 	APIBaseURL       string `mapstructure:"JIRA_API_BASE_URL"`   // default: "https://api.atlassian.com"
 	CallbackURL      string `mapstructure:"JIRA_CALLBACK_URL"`
 	TicketKeyPattern string `mapstructure:"JIRA_TICKET_KEY_PATTERN"` // default: "[A-Z][A-Z0-9]+-\d+"
+}
+
+type GitLabConfig struct {
+	ClientID      string `mapstructure:"GITLAB_CLIENT_ID"`
+	ClientSecret  string `mapstructure:"GITLAB_CLIENT_SECRET"`
+	WebhookSecret string `mapstructure:"GITLAB_WEBHOOK_SECRET"`
+	OAuthBaseURL  string `mapstructure:"GITLAB_OAUTH_BASE_URL"` // default: "https://gitlab.com"
+	APIBaseURL    string `mapstructure:"GITLAB_API_BASE_URL"`   // default: "https://gitlab.com/api/v4"
+	CallbackURL   string `mapstructure:"GITLAB_CALLBACK_URL"`
+}
+
+type LinearConfig struct {
+	ClientID      string `mapstructure:"LINEAR_CLIENT_ID"`
+	ClientSecret  string `mapstructure:"LINEAR_CLIENT_SECRET"`
+	WebhookSecret string `mapstructure:"LINEAR_WEBHOOK_SECRET"`
+	OAuthBaseURL  string `mapstructure:"LINEAR_OAUTH_BASE_URL"` // default: "https://linear.app"
+	APIBaseURL    string `mapstructure:"LINEAR_API_BASE_URL"`   // default: "https://api.linear.app/graphql"
+	CallbackURL   string `mapstructure:"LINEAR_CALLBACK_URL"`
+}
+
+type SlackConfig struct {
+	ClientID      string `mapstructure:"SLACK_CLIENT_ID"`
+	ClientSecret  string `mapstructure:"SLACK_CLIENT_SECRET"`
+	SigningSecret string `mapstructure:"SLACK_SIGNING_SECRET"`
+	OAuthBaseURL  string `mapstructure:"SLACK_OAUTH_BASE_URL"` // default: "https://slack.com"
+	APIBaseURL    string `mapstructure:"SLACK_API_BASE_URL"`   // default: "https://slack.com/api"
+	CallbackURL   string `mapstructure:"SLACK_CALLBACK_URL"`
+}
+
+type PagerDutyConfig struct {
+	WebhookSecret string `mapstructure:"PAGERDUTY_WEBHOOK_SECRET"`
+	APIBaseURL    string `mapstructure:"PAGERDUTY_API_BASE_URL"` // default: "https://api.pagerduty.com"
 }
 
 func Load() (*Config, error) {

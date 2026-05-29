@@ -1,0 +1,33 @@
+{
+  "ref": "refs/heads/main",
+  "after": "a3f9d2c1b4e5f6789012345678901234567890ab",
+  "before": "1234567890abcdef1234567890abcdef12345678",
+  "forced": false,
+  "repository": {
+    "name": "payment-service",
+    "full_name": "acme-corp/payment-service",
+    "default_branch": "main",
+    "owner": {
+      "login": "acme-corp",
+      "email": "owner@acme.com"
+    }
+  },
+  "pusher": {
+    "name": "alice-chen",
+    "email": "alice@acme.com"
+  },
+  "head_commit": {
+    "id": "a3f9d2c1b4e5f6789012345678901234567890ab",
+    "message": "feat(payments): add retry logic for failed transactions",
+    "timestamp": "2026-05-27T14:32:00Z",
+    "author": {
+      "name": "Alice Chen",
+      "email": "alice@acme.com",
+      "username": "alice-chen"
+    },
+    "added": [],
+    "removed": [],
+    "modified": []
+  },
+  "commits": []
+}
