@@ -1,0 +1,1 @@
+DROP TABLE audit_worm_manifests;

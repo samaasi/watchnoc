@@ -1,0 +1,1 @@
+DROP TABLE iso27001_mappings;
