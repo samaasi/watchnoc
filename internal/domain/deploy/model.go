@@ -185,8 +185,6 @@ type DeployEvent struct {
 
 func (DeployEvent) TableName() string { return "deploy_events" }
 
-
-
 // ToRiskLevel derives the human-readable tier from the numeric score.
 func ToRiskLevel(score int) RiskLevel {
 	switch {
@@ -207,6 +205,7 @@ type Service interface {
 	ExistsByGitHubDeploymentID(ctx context.Context, orgID uint64, deploymentID int64) (bool, error)
 	UpdateDeploymentStatus(ctx context.Context, req StatusUpdateRequest) error
 	UpdateCIStatus(ctx context.Context, req CIStatusUpdateRequest) error
+	GetDeployForApproval(ctx context.Context, orgID, deployID uint64) (*DeployForApproval, error)
 }
 
 // IngestRequest defines the request for ingesting a new deploy event.
