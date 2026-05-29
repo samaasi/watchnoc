@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	githubintegration "github.com/samaasi/watchnoc/internal/integrations/github"
+	jiraintegration "github.com/samaasi/watchnoc/internal/integrations/jira"
 	trellointegration "github.com/samaasi/watchnoc/internal/integrations/trello"
 )
 
@@ -23,6 +24,12 @@ type App struct {
 	TrelloEnrichment  *trellointegration.EnrichmentClient
 	TrelloInstallRepo trellointegration.InstallationRepository
 	TrelloReconciler  *trellointegration.Reconciler
+
+	JiraWebhook     *jiraintegration.WebhookHandler
+	JiraOAuth       *jiraintegration.OAuthHandler
+	JiraReconciler  *jiraintegration.Reconciler
+	JiraLinkage     *jiraintegration.LinkageEngine
+	JiraInstallRepo jiraintegration.InstallationRepository
 }
 
 func NewApp(db *gorm.DB) (*App, error) {

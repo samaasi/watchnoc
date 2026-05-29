@@ -7,6 +7,7 @@ import (
 	"github.com/samaasi/watchnoc/internal/config"
 
 	githubintegration "github.com/samaasi/watchnoc/internal/integrations/github"
+	jiraintegration "github.com/samaasi/watchnoc/internal/integrations/jira"
 	trellointegration "github.com/samaasi/watchnoc/internal/integrations/trello"
 )
 
@@ -129,6 +130,54 @@ func Wire(
 		ticketRepo,
 	)
 
+	// --- Jira Token Store ---
+	jiraTokenStore := jiraintegration.NewTokenStore(db)
+
+	// --- Jira Installation Repository ---
+	jiraInstallRepo := jiraintegration.NewInstallationRepository(db)
+
+	// --- Jira Client Factory ---
+	jiraClientFactory := jiraintegration.NewClientFactory(
+		cfg.Jira.ClientID,
+		cfg.Jira.ClientSecret,
+		jiraTokenStore,
+		jiraInstallRepo,
+	)
+
+	// --- Jira OAuth Handler ---
+	jiraOAuth := jiraintegration.NewOAuthHandler(
+		cfg.Jira.ClientID,
+		cfg.Jira.ClientSecret,
+		cfg.Jira.CallbackURL,
+		jiraTokenStore,
+		jiraInstallRepo,
+		orgService,
+		responder,
+	)
+
+	// --- Jira Issue Resolver ---
+	jiraResolver := jiraintegration.NewIssueResolver(jiraClientFactory)
+
+	// --- Jira Linkage Repository ---
+	jiraLinkRepo := jiraintegration.NewLinkageRepository(db)
+
+	// --- Jira Linkage Engine ---
+	jiraLinkage := jiraintegration.NewLinkageEngine(jiraResolver, jiraLinkRepo, deployService)
+
+	// --- Jira Event Router ---
+	jiraEventRouter := jiraintegration.NewEventRouter(ticketService, jobQueue)
+
+	// --- Jira Webhook Handler ---
+	jiraWebhook := jiraintegration.NewWebhookHandler(
+		cfg.Jira.WebhookSecret,
+		jiraEventRouter,
+		responder,
+		jiraInstallRepo,
+	)
+
+	// --- Jira Reconciler ---
+	jiraReconciler := jiraintegration.NewReconciler(jiraLinkage, deployService, jiraInstallRepo)
+
 	return &App{
 		GitHubWebhook:     githubWebhook,
 		GitHubOAuth:       githubOAuth,
@@ -138,5 +187,10 @@ func Wire(
 		TrelloEnrichment:  trelloEnrichment,
 		TrelloInstallRepo: trelloInstallRepo,
 		TrelloReconciler:  trelloReconciler,
+		JiraWebhook:       jiraWebhook,
+		JiraOAuth:         jiraOAuth,
+		JiraReconciler:    jiraReconciler,
+		JiraLinkage:       jiraLinkage,
+		JiraInstallRepo:   jiraInstallRepo,
 	}, cleanup, nil
 }
