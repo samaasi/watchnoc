@@ -15,6 +15,7 @@ type Config struct {
 	Auth     AuthConfig     `mapstructure:"auth"`
 	GitHub   GitHubConfig   `mapstructure:"github"`
 	Trello   TrelloConfig   `mapstructure:"trello"`
+	Jira     JiraConfig     `mapstructure:"jira"`
 }
 
 type ServerConfig struct {
@@ -61,6 +62,16 @@ type TrelloConfig struct {
 	CallbackURL        string `mapstructure:"TRELLO_OAUTH_CALLBACK_URL"`
 	WebhookCallbackURL string `mapstructure:"TRELLO_WEBHOOK_CALLBACK_URL"`
 	BaseURL            string `mapstructure:"TRELLO_API_BASE_URL"`
+}
+
+type JiraConfig struct {
+	ClientID         string `mapstructure:"JIRA_CLIENT_ID"`
+	ClientSecret     string `mapstructure:"JIRA_CLIENT_SECRET"`
+	WebhookSecret    string `mapstructure:"JIRA_WEBHOOK_SECRET"`
+	OAuthBaseURL     string `mapstructure:"JIRA_OAUTH_BASE_URL"` // default: "https://auth.atlassian.com"
+	APIBaseURL       string `mapstructure:"JIRA_API_BASE_URL"`   // default: "https://api.atlassian.com"
+	CallbackURL      string `mapstructure:"JIRA_CALLBACK_URL"`
+	TicketKeyPattern string `mapstructure:"JIRA_TICKET_KEY_PATTERN"` // default: "[A-Z][A-Z0-9]+-\d+"
 }
 
 func Load() (*Config, error) {
