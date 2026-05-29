@@ -1,0 +1,40 @@
+{
+  "action": {
+    "id": "6655f4c8d4a3f2e1a0b1c2d3",
+    "type": "updateCard",
+    "date": "2026-05-27T14:32:00Z",
+    "data": {
+      "card": {
+        "id": "65e1a2b3c4d5e6f7890abcde",
+        "idShort": 42,
+        "name": "ENG-1234: Add retry logic for payment failures"
+      },
+      "board": {
+        "id": "65e1a2b3c4d5e6f7890abcde",
+        "name": "Payment Service Sprint 12"
+      },
+      "listBefore": {
+        "id": "65e1a2b3c4d5e6f7890abcdf",
+        "name": "In Progress"
+      },
+      "listAfter": {
+        "id": "65e1a2b3c4d5e6f7890abcdg",
+        "name": "Deployed"
+      },
+      "old": null
+    },
+    "memberCreator": {
+      "id": "65e1a2b3c4d5e6f7890abcdh",
+      "username": "alice_chen",
+      "fullName": "Alice Chen"
+    }
+  },
+  "model": {
+    "id": "65e1a2b3c4d5e6f7890abcde",
+    "name": "ENG-1234: Add retry logic for payment failures",
+    "idShort": 42,
+    "shortLink": "AbCd1234",
+    "desc": "Implement exponential backoff for failed payment attempts",
+    "due": null
+  }
+}
